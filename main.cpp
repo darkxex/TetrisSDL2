@@ -6,10 +6,11 @@
 using namespace std;
 
 int mapa[13][22];
+const int posX=10, posY = 31;
 void cuadrado (int x, int y, int color,SDL_Rect& windowRect ,SDL_Rect& textureRect, SDL_Renderer* renderer, SDL_Texture* spriteSheet)
 {
-    windowRect.x = x*18;
-    windowRect.y = y*18;
+    windowRect.x = (x*18) +posX;
+    windowRect.y = (y*18)+ posY;
 textureRect.x = (color -1) * textureRect.w;
 SDL_RenderCopy(renderer, spriteSheet, &textureRect, &windowRect);
 
@@ -156,16 +157,22 @@ int main(int argc, char** args)
     SDL_Init(SDL_INIT_EVERYTHING);
     IMG_Init(IMG_INIT_PNG);
     SDL_Window* window = SDL_CreateWindow("Animating using Sprite Sheets", SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
+        SDL_WINDOWPOS_UNDEFINED, 320, 480, SDL_WINDOW_SHOWN);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_Event input;
     bool quit = false;
  limpiar_mapa();
     SDL_Texture* spriteSheet = NULL;
-    SDL_Surface* temp = IMG_Load("C:/Users/darkx/Desktop/tetris/bin/Debug/images/tiles.png");
+    SDL_Surface* temp = IMG_Load("C:/Users/darkx/Documents/GitHub/TetrisSDL2/bin/Debug/images/tiles.png");
     spriteSheet = SDL_CreateTextureFromSurface(renderer, temp);
     SDL_FreeSurface(temp);
 
+    SDL_Surface * image = IMG_Load("C:/Users/darkx/Documents/GitHub/TetrisSDL2/bin/Debug/images/background.png");
+    SDL_Texture * background = SDL_CreateTextureFromSurface(renderer, image);
+    SDL_FreeSurface(image);
+    SDL_Surface * image2 = IMG_Load("C:/Users/darkx/Documents/GitHub/TetrisSDL2/bin/Debug/images/frame.png");
+    SDL_Texture * background2 = SDL_CreateTextureFromSurface(renderer, image);
+    SDL_FreeSurface(image2);
     SDL_Rect windowRect;
     windowRect.x = 0;
     windowRect.y = 0;
@@ -183,13 +190,13 @@ int main(int argc, char** args)
  //enteros
 
  int vcaida = 7, aux = 0, pb = 0;
- int vcolision = 70,aux2 = 0;
+ int vcolision = 80,aux2 = 0;
  int aleatorio;
  //booleanos
  bool colb = false;
  bool coli = false;
  bool cold = false;
-
+ bool instantdown = false;
     //piezas
     bloque principal = {5,2};
     bloque anexo1[3] = {{0,-1},{1,-1},{0,1}};
@@ -220,13 +227,16 @@ unsigned int lastTime = 0, currentTime;
         switch(input.type)
         {
         case SDL_KEYDOWN:
-
+        if ((input.key.keysym.sym == SDLK_DOWN))
+        {vcaida = 0;}
         if ((input.key.keysym.sym == SDLK_RIGHT) && !cold)
         {Actual.incrX(1);}
         if ((input.key.keysym.sym == SDLK_LEFT) && !coli)
         {Actual.incrX(-1);}
-        if ((input.key.keysym.sym == SDLK_DOWN))
-        {vcaida = 0;}
+        if ((input.key.keysym.sym == SDLK_UP))
+        {
+        instantdown = true;
+        }
         break;
 
 
@@ -245,13 +255,14 @@ unsigned int lastTime = 0, currentTime;
 
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 255);
         SDL_RenderClear(renderer);
-
+        SDL_RenderCopy(renderer, background, NULL, NULL);
         mostrar_mapa(windowRect,textureRect,renderer,spriteSheet);
+
          if (Actual.colisionabajo()) colb = true;
          if (Actual.colisionizquierda()) coli = true;
          if (Actual.colisionderecha()) cold = true;
         Actual.mostrarpieza(windowRect,textureRect,renderer,spriteSheet);
-
+        SDL_RenderCopy(renderer, background2, NULL, NULL);
 
 
 
@@ -289,6 +300,37 @@ currentTime = SDL_GetTicks();
 colb = false;
          }
     lastTime = currentTime;
+  }
+
+  if(instantdown == true)
+  {
+
+      if ( !colb)
+        {
+
+            Actual.incrY(1);
+        }
+
+
+        //colision abajo
+         if (++aux2>= vcolision && colb){
+            aux2 = 0;
+            Actual.insertarmapa();
+            principal = {5,2};
+            Actual.setPrincipal(principal);
+
+            aleatorio = 1 + rand() % 6;
+
+
+    if (aleatorio == 1) Actual.setAnexo(anexo1),Actual.setColor(1);
+    else if (aleatorio == 2) Actual.setAnexo(anexo2),Actual.setColor(2);
+   else if (aleatorio == 3) Actual.setAnexo(anexo3),Actual.setColor(3);
+   else if (aleatorio == 4) Actual.setAnexo(anexo4),Actual.setColor(4);
+   else if (aleatorio == 5) Actual.setAnexo(anexo5),Actual.setColor(5);
+   else if (aleatorio == 6) Actual.setAnexo(anexo6),Actual.setColor(6);
+instantdown = false;
+colb = false;
+         }
   }
 
 
