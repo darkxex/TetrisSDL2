@@ -62,6 +62,7 @@ public:
     bool colisionabajo();
     bool colisionderecha();
     bool colisionizquierda();
+    bool check();
     void insertarmapa();
     void setPrincipal(bloque new_prin) {b_principal = new_prin;}
     void setAnexo(bloque new_anexo[3])
@@ -69,7 +70,8 @@ public:
     b_anexo[i] = new_anexo[i];
     }
     void setColor(int newColor){color = newColor;}
-
+    void rotar();
+    void rotar2();
 };
 
 pieza::pieza (bloque b_principal_, bloque b_anexo_[3],int color_)
@@ -91,6 +93,29 @@ anexo_x = b_principal.x + b_anexo[i].x;
 anexo_y = b_principal.y + b_anexo[i].y;
 mapa[anexo_y][anexo_x] = color;
 }
+}
+
+void pieza::rotar()
+{
+    int aux;
+    for(int i = 0;i <3;i++)
+    {
+    aux = b_anexo[i].x;
+    b_anexo[i].x = b_anexo[i].y;
+    b_anexo[i].y = aux;
+    b_anexo[i].x *= -1;
+    }
+}
+void pieza::rotar2()
+{
+    int aux;
+    for(int i = 0;i <3;i++)
+    {
+    aux = b_anexo[i].x;
+    b_anexo[i].x = b_anexo[i].y;
+    b_anexo[i].y = aux;
+    b_anexo[i].y *= -1;
+    }
 }
 void pieza::mostrarpieza(SDL_Rect& windowRect ,SDL_Rect& textureRect, SDL_Renderer* renderer, SDL_Texture* spriteSheet)
 {
@@ -151,6 +176,20 @@ if (mapa[anexo_y][anexo_x + 1] != 0)
 return false;
 }
 
+bool pieza::check()
+{
+      int anexo_x, anexo_y;
+    if (mapa[b_principal.y][b_principal.x] != 0)
+    return true;
+    for(int i = 0;i <3;i++)
+{
+anexo_x = b_principal.x + b_anexo[i].x;
+anexo_y = b_principal.y + b_anexo[i].y;
+if (mapa[anexo_y][anexo_x] != 0)
+    return true;
+}
+return false;
+}
 
 int main(int argc, char** args)
 {srand(time(0));
@@ -190,13 +229,14 @@ int main(int argc, char** args)
  //enteros
 
  int vcaida = 7, aux = 0, pb = 0;
- int vcolision = 80,aux2 = 0;
+ int vcolision = 60,aux2 = 0;
  int aleatorio;
  //booleanos
  bool colb = false;
  bool coli = false;
  bool cold = false;
  bool instantdown = false;
+
     //piezas
     bloque principal = {5,2};
     bloque anexo1[3] = {{0,-1},{1,-1},{0,1}};
@@ -207,7 +247,7 @@ int main(int argc, char** args)
     bloque anexo6[3] = {{-1,-1},{0,-1},{1,0}};
    //pieza aleatoria
 
-    pieza Actual(principal,anexo2,1);
+    pieza Actual(principal,anexo1,1);
 
     aleatorio = 1 + rand()%6;
     if (aleatorio == 1) Actual.setAnexo(anexo1),Actual.setColor(1);
@@ -237,6 +277,36 @@ unsigned int lastTime = 0, currentTime;
         {
         instantdown = true;
         }
+        if ((input.key.keysym.sym == SDLK_z))
+        {
+             pieza pAux = Actual;
+            Actual.rotar();
+            bool test = Actual.check();
+            if (test)
+            {
+                Actual = pAux;
+            }
+            aux2 = vcolision/3;
+
+        }
+
+        if ((input.key.keysym.sym == SDLK_x))
+        {
+
+
+             pieza pAux = Actual;
+            Actual.rotar2();
+            bool test = Actual.check();
+            if (test)
+            {
+                Actual = pAux;
+            }
+            aux2 = vcolision/3;
+
+
+
+
+        }
         break;
 
 
@@ -263,6 +333,9 @@ unsigned int lastTime = 0, currentTime;
          if (Actual.colisionderecha()) cold = true;
         Actual.mostrarpieza(windowRect,textureRect,renderer,spriteSheet);
         SDL_RenderCopy(renderer, background2, NULL, NULL);
+
+
+
 
 
 
